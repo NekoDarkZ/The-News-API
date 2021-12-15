@@ -22,16 +22,30 @@
 package cl.ucn.disc.dsm.smurquio.newsapi;
 
 import cl.ucn.disc.dsm.smurquio.newsapi.model.News;
+import com.kwabenaberko.newsapilib.models.Article;
+import com.kwabenaberko.newsapilib.models.response.ArticleResponse;
+import com.kwabenaberko.newsapilib.network.APIClient;
+import com.kwabenaberko.newsapilib.network.APIService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.ZonedDateTime;
+import retrofit2.Response;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Controller of News
  * @author Sebastián Murquio Castillo
  */
+@Slf4j
 @RestController
 public class NewsController {
 
@@ -53,11 +67,108 @@ public class NewsController {
    * @return all the News in the backend.
    */
   @GetMapping("/v1/news")
-  public List<News> getNews(){
+  public List<News> all(@RequestParam(required = false, defaultValue = "false") Boolean reload){
+
+    // is reload -> get news from NewsApi.org
+    if(reload){
+      //FIXME: Avoid the duplicated!
+      this.reloadNewsFromNewsApi();
+    }
+
     // Equals to SELECT * FROM News;
     final List<News> theNews = this.newsRepository.findAll();
     //TODO: show the news in console.
     return theNews;
+  }
+
+  /**
+   * Get the News from NewsAPI and save into the database.
+   */
+  private void reloadNewsFromNewsApi() {
+    //WARNING: Just for test
+    final String API_KEY = "74609a6b455346e38cf11b8ad39e4d61";
+    final int pageSize = 100;
+
+    //1. Create the APIService from APIClient
+    final APIService apiService = APIClient.getAPIService();
+
+    //2. Build the request params
+    final Map<String,String> reqParams = new HashMap<>();
+    //The API key
+    reqParams.put("apikey", API_KEY);
+
+    //Filter by category
+    reqParams.put("category", "technology");
+
+    //The number of results to return per page (request). 20 default, max 100
+    reqParams.put("pageSize", String.valueOf(pageSize));
+
+    //3. Call the request
+    try {
+      Response<ArticleResponse> articlesResponse =
+          apiService.getTopHeadlines(reqParams).execute();
+
+      //Exito!
+      if(articlesResponse.isSuccessful()){
+        //TODO: Check for articles != null
+        List<Article> articles = articlesResponse.body().getArticles();
+
+        List<News> news = new ArrayList<>();
+        // List<Article> to List<News>
+        for(Article article : articles){
+          news.add(toNews(article));
+        }
+
+        //4. Save into the local database.
+        this.newsRepository.saveAll(news);
+      }
+
+    } catch (IOException e) {
+      log.error("Getting the Articles from NewsAPI", e);
+
+    }
+
+  }
+
+  /**
+   * Convert Article to News.
+   *
+   * @param article to convert.
+   * @return the News
+   */
+  private static News toNews(Article article){
+
+    // Protection Author
+    if(article.getAuthor() == null || article.getAuthor().length() < 3){
+      article.setAuthor("No author*");
+    }
+
+    // Protection Title
+    if(article.getTitle() == null || article.getTitle().length() < 3){
+      article.setAuthor("No Title*");
+    }
+
+    // Protection Description
+    if(article.getDescription() == null || article.getDescription().length() < 4){
+      article.setDescription("No Description*");
+    }
+
+    //Parse the date and fix the Zone
+    ZonedDateTime publishedAt = ZonedDateTime
+        .parse(article.getPublishedAt())
+        // Correct from UTC to LocalTime (Chile)
+        .withZoneSameInstant(ZoneId.of("-3"));
+
+    return new News(
+        article.getTitle(),
+        article.getSource().getName(),
+        article.getAuthor(),
+        article.getUrl(),
+        article.getUrlToImage(),
+        article.getDescription(),
+        article.getDescription(),
+        publishedAt
+    );
   }
 
   /**
