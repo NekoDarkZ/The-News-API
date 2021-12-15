@@ -22,51 +22,62 @@
 package cl.ucn.disc.dsm.smurquio.newsapi.model;
 
 import net.openhft.hashing.LongHashFunction;
-
 import org.threeten.bp.ZonedDateTime;
 import lombok.Getter;
+
+import javax.persistence.*;
 
 /**
  * The News Class.
  *
  * @author Sebastián Murquio Castillo
  */
+@Entity
 public final class News {
 
+  /**
+   * Primary Key.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @Getter
-  private final Long id;
+  private Long key;
+
+  //@Column(unique = true)
+  @Getter
+  private Long id;
 
   @Getter
-  private final String title;
+  private String title;
 
   @Getter
-  private final String source;
+  private String source;
 
   @Getter
-  private final String author;
+  private String author;
 
   @Getter
-  private final String url;
+  private String url;
 
   @Getter
-  private final String urlImage;
+  private String urlImage;
 
   @Getter
-  private final String description;
+  private String description;
 
   @Getter
-  private final String content;
+  private String content;
 
   @Getter
-  private final ZonedDateTime publishedAt;
+  private ZonedDateTime publishedAt;
 
   /*
    * JPA required!
+   */
 
   public News( ){
     //Nothing here
   }
-   */
 
   /**
    * The Constructor of News.
