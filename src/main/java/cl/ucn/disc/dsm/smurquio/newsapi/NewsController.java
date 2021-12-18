@@ -180,7 +180,7 @@ public class NewsController {
         article.getUrlToImage(),
         article.getDescription(),
         article.getDescription(),
-        publishedAt
+        article.getPublishedAt()
     );
   }
 

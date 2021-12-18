@@ -21,11 +21,13 @@
 
 package cl.ucn.disc.dsm.smurquio.newsapi.model;
 
-import net.openhft.hashing.LongHashFunction;
-import org.threeten.bp.ZonedDateTime;
 import lombok.Getter;
+import net.openhft.hashing.LongHashFunction;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 /**
  * The News Class.
@@ -69,7 +71,7 @@ public final class News {
   private String content;
 
   @Getter
-  private ZonedDateTime publishedAt;
+  private String publishedAt;
 
   public News( ){
     //Nothing here
@@ -93,7 +95,7 @@ public final class News {
               final String urlImage,
               final String description,
               final String content,
-              final ZonedDateTime publishedAt) {
+              final String publishedAt) {
 
     // Title
     if(title == null || title.length() < 2) {
