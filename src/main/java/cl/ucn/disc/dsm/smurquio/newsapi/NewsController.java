@@ -27,10 +27,12 @@ import com.kwabenaberko.newsapilib.models.response.ArticleResponse;
 import com.kwabenaberko.newsapilib.network.APIClient;
 import com.kwabenaberko.newsapilib.network.APIService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 import retrofit2.Response;
@@ -71,12 +73,11 @@ public class NewsController {
 
     // is reload -> get news from NewsApi.org
     if(reload){
-      //FIXME: Avoid the duplicated!
+
       this.reloadNewsFromNewsApi();
     }
 
     // Equals to SELECT * FROM News;
-    //TODO: show the news in console.
     return this.newsRepository.findAll();
   }
 
@@ -190,8 +191,7 @@ public class NewsController {
    */
   @GetMapping("/v1/news/{id}")
   public News one(@PathVariable final Long id){
-    //FIXME: Change the RuntimeException to 404
     return this.newsRepository.findById(id)
-        .orElseThrow(()-> new RuntimeException("News Not Found :("));
+        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found :("));
   }
 }
