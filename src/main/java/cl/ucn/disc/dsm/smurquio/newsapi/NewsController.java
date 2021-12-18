@@ -71,7 +71,7 @@ public class NewsController {
   @GetMapping("/v1/news")
   public List<News> all(@RequestParam(required = false, defaultValue = "false") Boolean reload){
 
-    // is reload -> get news from NewsApi.org
+    // is reloaded -> get news from NewsApi.org
     if(reload){
 
       this.reloadNewsFromNewsApi();

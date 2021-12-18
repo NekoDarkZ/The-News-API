@@ -71,10 +71,6 @@ public final class News {
   @Getter
   private ZonedDateTime publishedAt;
 
-  /*
-   * JPA required!
-   */
-
   public News( ){
     //Nothing here
   }
@@ -120,8 +116,10 @@ public final class News {
     // ID: Hashing(title + | + source + | + author)
     this.id = LongHashFunction.xx().hashChars(title + "|" + source +  "|"+ author);
 
-
+    // Url
     this.url = url;
+
+    // Image Url
     this.urlImage = urlImage;
 
     // Description
@@ -136,6 +134,7 @@ public final class News {
     }
     this.content = content;
 
+    //Published At
     if(publishedAt == null){
       throw new IllegalArgumentException("Published At Required");
     }
