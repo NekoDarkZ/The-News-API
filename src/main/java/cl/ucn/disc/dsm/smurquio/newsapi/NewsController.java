@@ -76,9 +76,8 @@ public class NewsController {
     }
 
     // Equals to SELECT * FROM News;
-    final List<News> theNews = this.newsRepository.findAll();
     //TODO: show the news in console.
-    return theNews;
+    return this.newsRepository.findAll();
   }
 
   /**
@@ -110,22 +109,35 @@ public class NewsController {
 
       //Exito!
       if(articlesResponse.isSuccessful()){
-        //TODO: Check for articles != null
+        assert articlesResponse.body() != null;
         List<Article> articles = articlesResponse.body().getArticles();
 
-        List<News> news = new ArrayList<>();
         // List<Article> to List<News>
-        for(Article article : articles){
-          news.add(toNews(article));
-        }
+        List<News> news = new ArrayList<>();
 
-        //4. Save into the local database.
-        this.newsRepository.saveAll(news);
+        if(articles != null){
+          for(Article article : articles){
+
+            News _new = toNews(article);
+
+            news.add(_new);
+
+            //Call the findNewsByIdEquals method to search if the current News is already in the database.
+            List<News> repoNews = this.newsRepository.findNewsByIdEquals(_new.getId());
+
+            //if the list isn´t empty, then remove the News in news list.
+            if(!repoNews.isEmpty()){
+              news.remove(_new);
+            }
+          }
+
+          //4. Save into the local database.
+          this.newsRepository.saveAll(news);
+        }
       }
 
     } catch (IOException e) {
       log.error("Getting the Articles from NewsAPI", e);
-
     }
 
   }

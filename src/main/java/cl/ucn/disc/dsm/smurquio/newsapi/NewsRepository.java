@@ -25,6 +25,8 @@ import cl.ucn.disc.dsm.smurquio.newsapi.model.News;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * The repository of news.
  *
@@ -32,5 +34,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface NewsRepository extends JpaRepository<News, Long> {
-
+  /**
+   * List of News founded by id.
+   * @param id to search.
+   * @return the list.
+   */
+  List<News> findNewsByIdEquals(Long id);
 }
